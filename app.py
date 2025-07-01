@@ -10,6 +10,8 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 swagger = Swagger(app)
 
+db.create_all()
+
 class Student(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -159,8 +161,3 @@ def delete_student(id):
     db.session.delete(student)
     db.session.commit()
     return '', 204
-
-if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
