@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flasgger import Swagger
 
 app = Flask(__name__)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///students.db"
+app.config["SQLALCHEMY_DATABASE_URI"] = DATABASE_URL
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -17,6 +17,10 @@ class Student(db.Model):
 
     def to_dict(self):
         return {"id": self.id, "name": self.name, "age": self.age, "course": self.course}
+
+@app.route("/", methods=["GET"])
+def default():
+    return 'Hello, World!'
 
 @app.route("/students", methods=["POST"])
 def create_student():
