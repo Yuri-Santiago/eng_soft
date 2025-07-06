@@ -1,0 +1,21 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+      - run: pip install -r requirements.txt
+      - run: python test_api.py
+      
+      # Deploy to Render via Webhook
+      #- name: Deploy to Render
+       # run: |
+        #  curl -X POST ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
