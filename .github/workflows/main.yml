@@ -51,5 +51,8 @@ jobs:
       - name: Create tables
         run: python create_tables.py
 
+      - name: Set PYTHONPATH
+        run: echo "PYTHONPATH=${PWD}" >> $GITHUB_ENV
+
       - name: Run tests
         run: pytest -v
