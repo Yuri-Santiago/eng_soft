@@ -48,6 +48,9 @@ jobs:
       - name: Set DATABASE_URL
         run: echo "DATABASE_URL=postgresql://user:pass@localhost:5432/testdb" >> $GITHUB_ENV
 
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@v3.89.2
+  
       - name: Create tables
         run: python create_tables.py
 
