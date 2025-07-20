@@ -1,0 +1,22 @@
+name: CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_publish:
+    name: Build and Push Docker image to GHCR
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Build and push the image
+        run: |
+        docker login --username yuri_santiago --password ${{ secrets.GH_PAT }}
+        docker build --platform=linux/amd64 -t ghcr.io/yuri-santiago/eng_soft_ghcr:latest .
+        docker push ghcr.io/yuri-santiago/eng_soft_ghcr:latest
