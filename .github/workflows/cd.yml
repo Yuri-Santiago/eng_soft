@@ -20,3 +20,6 @@ jobs:
           docker login --username yuri-santiago --password ${{ secrets.GH_PAT }} ghcr.io
           docker build --platform=linux/amd64 -t ghcr.io/yuri-santiago/eng_soft_ghcr:latest .
           docker push ghcr.io/yuri-santiago/eng_soft_ghcr:latest
+
+      - name: Trigger Deploy on Render
+        run: curl -X GET "${{ secrets.RENDER_WEBHOOK_URL }}"
