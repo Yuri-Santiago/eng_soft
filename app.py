@@ -27,6 +27,14 @@ class Teacher(db.Model):
     def to_dict(self):
         return {"id": self.id, "name": self.name, "department": self.department}
 
+class Classroom(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    semester = db.Column(db.String(50), nullable=False)
+
+    def to_dict(self):
+        return {"id": self.id, "name": self.name, "semester": self.semester}
+
 @app.route("/", methods=["GET"])
 def default():
     return 'Hello, World!'
@@ -295,5 +303,135 @@ def delete_teacher(id):
     if not teacher:
         return jsonify({"error": "Not found"}), 404
     db.session.delete(teacher)
+    db.session.commit()
+    return '', 204
+
+@app.route("/classrooms", methods=["POST"])
+def create_classroom():
+    """
+    Create a new classroom
+    ---
+    tags:
+      - Classrooms
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          id: Classroom
+          required:
+            - name
+            - semester
+          properties:
+            name:
+              type: string
+              example: Engenharia de Software
+            semester:
+              type: string
+              example: 2025.1
+    responses:
+      201:
+        description: Classroom created
+    """
+    data = request.get_json()
+    classroom = Classroom(name=data["name"], semester=data["semester"])
+    db.session.add(classroom)
+    db.session.commit()
+    return jsonify(classroom.to_dict()), 201
+
+@app.route("/classrooms", methods=["GET"])
+def list_classrooms():
+    """
+    Get all classrooms
+    ---
+    tags:
+      - Classrooms
+    responses:
+      200:
+        description: A list of classrooms
+    """
+    classrooms = Classroom.query.all()
+    return jsonify([c.to_dict() for c in classrooms])
+
+@app.route("/classrooms/<int:id>", methods=["GET"])
+def get_classroom(id):
+    """
+    Get a classroom by ID
+    ---
+    tags:
+      - Classrooms
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: A single classroom
+      404:
+        description: Classroom not found
+    """
+    classroom = db.session.get(Classroom, id)
+    if not classroom:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(classroom.to_dict())
+
+@app.route("/classrooms/<int:id>", methods=["PUT"])
+def update_classroom(id):
+    """
+    Update a classroom
+    ---
+    tags:
+      - Classrooms
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+      - in: body
+        name: body
+        schema:
+          properties:
+            name:
+              type: string
+            semester:
+              type: string
+    responses:
+      200:
+        description: Classroom updated
+      404:
+        description: Classroom not found
+    """
+    classroom = db.session.get(Classroom, id)
+    if not classroom:
+        return jsonify({"error": "Not found"}), 404
+    data = request.get_json()
+    classroom.name = data.get("name", classroom.name)
+    classroom.semester = data.get("semester", classroom.semester)
+    db.session.commit()
+    return jsonify(classroom.to_dict())
+
+@app.route("/classrooms/<int:id>", methods=["DELETE"])
+def delete_classroom(id):
+    """
+    Delete a classroom
+    ---
+    tags:
+      - Classrooms
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      204:
+        description: Classroom deleted
+      404:
+        description: Classroom not found
+    """
+    classroom = db.session.get(Classroom, id)
+    if not classroom:
+        return jsonify({"error": "Not found"}), 404
+    db.session.delete(classroom)
     db.session.commit()
     return '', 204
