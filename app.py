@@ -46,7 +46,7 @@ class Book(db.Model):
 
 @app.route("/", methods=["GET"])
 def default():
-    return 'Hello, World!'
+    return 'Olá Mundo!'
 
 @app.route("/students", methods=["POST"])
 def create_student():
