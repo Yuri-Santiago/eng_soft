@@ -34,6 +34,15 @@ class Classroom(db.Model):
 
     def to_dict(self):
         return {"id": self.id, "name": self.name, "semester": self.semester}
+    
+class Book(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+
+    def to_dict(self):
+        return {"id": self.id, "title": self.title, "author": self.author, "year": self.year}
 
 @app.route("/", methods=["GET"])
 def default():
@@ -433,5 +442,142 @@ def delete_classroom(id):
     if not classroom:
         return jsonify({"error": "Not found"}), 404
     db.session.delete(classroom)
+    db.session.commit()
+    return '', 204
+
+@app.route("/books", methods=["POST"])
+def create_book():
+    """
+    Create a new book
+    ---
+    tags:
+      - Books
+    parameters:
+      - in: body
+        name: body
+        required: true
+        schema:
+          id: Book
+          required:
+            - title
+            - author
+            - year
+          properties:
+            title:
+              type: string
+              example: Clean Code
+            author:
+              type: string
+              example: Robert C. Martin
+            year:
+              type: integer
+              example: 2008
+    responses:
+      201:
+        description: Book created
+    """
+    data = request.get_json()
+    book = Book(title=data["title"], author=data["author"], year=data["year"])
+    db.session.add(book)
+    db.session.commit()
+    return jsonify(book.to_dict()), 201
+
+@app.route("/books", methods=["GET"])
+def list_books():
+    """
+    Get all books
+    ---
+    tags:
+      - Books
+    responses:
+      200:
+        description: A list of books
+    """
+    books = Book.query.all()
+    return jsonify([b.to_dict() for b in books])
+
+@app.route("/books/<int:id>", methods=["GET"])
+def get_book(id):
+    """
+    Get a book by ID
+    ---
+    tags:
+      - Books
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: A single book
+      404:
+        description: Book not found
+    """
+    book = db.session.get(Book, id)
+    if not book:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(book.to_dict())
+
+@app.route("/books/<int:id>", methods=["PUT"])
+def update_book(id):
+    """
+    Update a book
+    ---
+    tags:
+      - Books
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+      - in: body
+        name: body
+        schema:
+          properties:
+            title:
+              type: string
+            author:
+              type: string
+            year:
+              type: integer
+    responses:
+      200:
+        description: Book updated
+      404:
+        description: Book not found
+    """
+    book = db.session.get(Book, id)
+    if not book:
+        return jsonify({"error": "Not found"}), 404
+    data = request.get_json()
+    book.title = data.get("title", book.title)
+    book.author = data.get("author", book.author)
+    book.year = data.get("year", book.year)
+    db.session.commit()
+    return jsonify(book.to_dict())
+
+@app.route("/books/<int:id>", methods=["DELETE"])
+def delete_book(id):
+    """
+    Delete a book
+    ---
+    tags:
+      - Books
+    parameters:
+      - name: id
+        in: path
+        type: integer
+        required: true
+    responses:
+      204:
+        description: Book deleted
+      404:
+        description: Book not found
+    """
+    book = db.session.get(Book, id)
+    if not book:
+        return jsonify({"error": "Not found"}), 404
+    db.session.delete(book)
     db.session.commit()
     return '', 204
